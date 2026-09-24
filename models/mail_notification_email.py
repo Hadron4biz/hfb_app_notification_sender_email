@@ -16,16 +16,28 @@
 # all copies or substantial portions of the Software.
 #
 #################################################################################
-""" @version	17.0.1.0.0
+""" @version	18.0.1.0.1
 	@owner  Hadron for Business
 	@author Hadron for Business sp. z o.o.
-	@date   2026.09.17
+	@date   2026.09.24
 
 	Notification Sender Email
 	Freezes the recipient partner's email address on mail.notification at
 	the moment a notification is created, and surfaces it in the chatter's
 	notification popover - so the popover always shows the address the
 	message actually went to, even if the partner's email changes later.
+
+	18.0 note: core Odoo moved notification serialization from the old
+	_notification_format() (a plain list of snapshot dicts, where 'persona'
+	was itself a snapshot dict safe to add an 'email' key to) to _to_store()
+	(mail.tools.discuss.Store), where 'persona' is now a *relational*
+	reference to the shared res.partner record in the client Store - the
+	same partner record other notifications/messages point to. Writing our
+	frozen email onto that shared object would leak across every
+	notification referencing that partner, and get discarded on the next
+	Store update anyway. So x_sent_to_email is sent as its own top-level
+	field instead of being merged into 'persona', and the JS template patch
+	displays that field directly.
 """
 from odoo import api, fields, models
 
@@ -53,20 +65,13 @@ class MailNotification(models.Model):
                 record.x_sent_to_email = record.res_partner_id.email
         return records
 
-    def _notification_format(self):
-        result = super()._notification_format()
-
-        by_id = {notif.id: notif for notif in self}
-        for data in result:
-            if data.get('persona'):
-                notif = by_id.get(data['id'])
-                if notif:
-                    email = notif.x_sent_to_email or (
-                        notif.res_partner_id.email if notif.res_partner_id else False
-                    )
-                    if email:
-                        data['persona']['email'] = email
-
-        return result
+    def _to_store(self, store, /):
+        super()._to_store(store)
+        for notif in self:
+            email = notif.x_sent_to_email or (
+                notif.res_partner_id.email if notif.res_partner_id else False
+            )
+            if email:
+                store.add(notif, {'x_sent_to_email': email})
 
 #EoF

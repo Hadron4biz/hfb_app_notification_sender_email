@@ -5,9 +5,9 @@
        t-inherit="mail.MessageNotificationPopover"
        t-inherit-mode="extension">
         <xpath expr="//span[@t-if='notification.persona']" position="after">
-            <span t-if="notification.persona and notification.persona.email"
+            <span t-if="notification.x_sent_to_email"
                   class="text-muted ms-1"
-                  t-esc="'(' + notification.persona.email + ')'"/>
+                  t-esc="'(' + notification.x_sent_to_email + ')'"/>
         </xpath>
         <xpath expr="//div[@t-foreach='props.message.notifications']" position="before">
             <div class="text-muted small mb-1" t-esc="props.message.datetimeShort"/>

@@ -33,7 +33,7 @@ This app freezes the recipient's email address at the moment each
 notification is created, and shows that frozen address in the popover
 instead of the partner's current one.
 """,
-    'version': "18.0.1.0.0",
+    'version': "18.0.1.0.1",
     'author': "Hadron for Business sp. z o.o.",
     'website': "http://hadronforbusiness.com",
     'license': "OPL-1",
