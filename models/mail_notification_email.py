@@ -16,16 +16,24 @@
 # all copies or substantial portions of the Software.
 #
 #################################################################################
-""" @version	17.0.1.0.0
+""" @version	19.0.1.0.1
 	@owner  Hadron for Business
 	@author Hadron for Business sp. z o.o.
-	@date   2026.09.17
+	@date   2026.09.24
 
 	Notification Sender Email
 	Freezes the recipient partner's email address on mail.notification at
 	the moment a notification is created, and surfaces it in the chatter's
 	notification popover - so the popover always shows the address the
 	message actually went to, even if the partner's email changes later.
+
+	19.0 note: core Odoo replaced _notification_format() with the
+	declarative _to_store_defaults(), and the popover now shows
+	notification.res_partner_id.email natively - but that's a *relational*
+	reference to the shared res.partner record, always live. Our frozen
+	value is exposed as its own top-level field (x_sent_to_email) rather
+	than trying to override the shared partner record, and the JS template
+	patch prefers it over the live relation when present.
 """
 from odoo import api, fields, models
 
@@ -53,20 +61,7 @@ class MailNotification(models.Model):
                 record.x_sent_to_email = record.res_partner_id.email
         return records
 
-    def _notification_format(self):
-        result = super()._notification_format()
-
-        by_id = {notif.id: notif for notif in self}
-        for data in result:
-            if data.get('persona'):
-                notif = by_id.get(data['id'])
-                if notif:
-                    email = notif.x_sent_to_email or (
-                        notif.res_partner_id.email if notif.res_partner_id else False
-                    )
-                    if email:
-                        data['persona']['email'] = email
-
-        return result
+    def _to_store_defaults(self, target):
+        return super()._to_store_defaults(target) + ['x_sent_to_email']
 
 #EoF

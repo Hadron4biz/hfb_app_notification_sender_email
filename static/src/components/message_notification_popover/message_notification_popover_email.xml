@@ -4,13 +4,17 @@
     <t t-name="hfb_app_notification_sender_email.MessageNotificationPopoverEmail"
        t-inherit="mail.MessageNotificationPopover"
        t-inherit-mode="extension">
-        <xpath expr="//span[@t-if='notification.persona']" position="after">
-            <span t-if="notification.persona and notification.persona.email"
-                  class="text-muted ms-1"
-                  t-esc="'(' + notification.persona.email + ')'"/>
+        <!-- res_partner_id is a relational reference to the shared, live
+             res.partner record - we don't touch it. Instead we prefer our
+             frozen x_sent_to_email over its live .email wherever the native
+             template already renders the partner's address. -->
+        <xpath expr="//div[@t-foreach='otherNotifications']//t[@t-out='notification.res_partner_id.email']"
+               position="attributes">
+            <attribute name="t-out">notification.x_sent_to_email or notification.res_partner_id.email</attribute>
         </xpath>
-        <xpath expr="//div[@t-foreach='props.message.notifications']" position="before">
-            <div class="text-muted small mb-1" t-esc="props.message.datetimeShort"/>
+        <xpath expr="//div[@t-foreach='followerNotifications']//t[@t-out='notification.res_partner_id.email']"
+               position="attributes">
+            <attribute name="t-out">notification.x_sent_to_email or notification.res_partner_id.email</attribute>
         </xpath>
     </t>
 
