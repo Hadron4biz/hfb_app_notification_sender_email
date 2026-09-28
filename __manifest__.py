@@ -47,6 +47,9 @@ instead of the partner's current one.
             'hfb_app_notification_sender_email/static/src/components/message_notification_popover/message_notification_popover_email.xml',
         ],
     },
+    'images': [
+        'static/description/banner_screenshot.png',
+    ],
     'installable': True,
     'application': False,
 }
