@@ -27,13 +27,12 @@
 	notification popover - so the popover always shows the address the
 	message actually went to, even if the partner's email changes later.
 
-	19.0 note: core Odoo replaced _notification_format() with the
-	declarative _to_store_defaults(), and the popover now shows
-	notification.res_partner_id.email natively - but that's a *relational*
-	reference to the shared res.partner record, always live. Our frozen
-	value is exposed as its own top-level field (x_sent_to_email) rather
-	than trying to override the shared partner record, and the JS template
-	patch prefers it over the live relation when present.
+	20.0 note: the store serialization hook is now
+	_store_notification_fields(res), and Odoo 20 itself stores the address
+	used at send time in mail_email_address and shows it in the popover.
+	x_sent_to_email still matters for notifications created before the
+	upgrade to 20 (mail_email_address is empty on those), so it is sent to
+	the client and preferred by the popover patch when present.
 """
 from odoo import api, fields, models
 
@@ -61,7 +60,10 @@ class MailNotification(models.Model):
                 record.x_sent_to_email = record.res_partner_id.email
         return records
 
-    def _to_store_defaults(self, target):
-        return super()._to_store_defaults(target) + ['x_sent_to_email']
+    def _store_notification_fields(self, res):
+        super()._store_notification_fields(res)
+        # same visibility rule core applies to mail_email_address
+        if res.is_for_internal_users():
+            res.append('x_sent_to_email')
 
 #EoF

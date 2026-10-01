@@ -44,7 +44,7 @@ instead of the partner's current one.
     'data': [],
     'assets': {
         'web.assets_backend': [
-            'hfb_app_notification_sender_email/static/src/components/message_notification_popover/message_notification_popover_email.xml',
+            'hfb_app_notification_sender_email/static/src/components/message_notification_popover/message_notification_popover_patch.js',
         ],
     },
     'images': [
